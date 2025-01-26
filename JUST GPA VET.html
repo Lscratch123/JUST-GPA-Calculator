@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JUST GPA Calculator</title>
+    <style>
+        :root {
+            --bg-color-light: #f9f9f9;
+            --text-color-light: #333;
+            --bg-color-dark: #1e1e1e;
+            --text-color-dark: #f9f9f9;
+            --accent-color: #007aff;
+            --card-bg-light: #ffffff;
+            --card-bg-dark: #2c2c2e;
+        }
+
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background-color: var(--bg-color-light);
+            color: var(--text-color-light);
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .dark-mode {
+            background-color: var(--bg-color-dark);
+            color: var(--text-color-dark);
+        }
+
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--accent-color);
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 5px;
+        }
+
+        input, select, button {
+            width: 100%;
+            padding: 10px;
+            border-radius: 12px;
+            border: 1px solid #ccc;
+            font-size: 16px;
+        }
+
+        button {
+            background-color: var(--accent-color);
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        button:hover {
+            background-color: #005bb5;
+        }
+
+        .card {
+            background-color: var(--card-bg-light);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: background-color 0.3s;
+        }
+
+        .dark-mode .card {
+            background-color: var(--card-bg-dark);
+        }
+
+        .toggle-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .toggle {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .toggle input {
+            display: none;
+        }
+
+        .toggle span {
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>GPA Calculator</h1>
+
+        <div class="toggle-container">
+            <label class="toggle">
+                <input type="checkbox" id="themeToggle" onclick="toggleTheme()">
+                <span>Dark Mode</span>
+            </label>
+        </div>
+
+        <div class="input-group">
+            <label>Total Credits Passed:</label>
+            <input type="number" id="totalCreditsPassed" step="0.1" />
+        </div>
+
+        <div class="input-group">
+            <label>Current GPA:</label>
+            <input type="number" id="currentGPA" step="0.01" />
+        </div>
+
+        <div id="subjectContainer" class="card"></div>
+        <button onclick="addSubject()">Add Subject</button>
+
+        <h2>Repeated Subjects</h2>
+        <div id="repeatedContainer" class="card"></div>
+        <button onclick="addRepeatedSubject()">Add Repeated Subject</button>
+
+        <button onclick="calculateGPA()" style="margin-top: 20px;">Calculate GPA</button>
+
+        <h2 id="result" style="text-align: center; margin-top: 20px;">Semester GPA: 0.00 | Cumulative GPA: 0.00</h2>
+    </div>
+
+    <script>
+        const gradePoints = {
+            "A+": 4.20,
+            "A": 4.00,
+            "A-": 3.75,
+            "B+": 3.50,
+            "B": 3.25,
+            "B-": 3.00,
+            "C+": 2.75,
+            "C": 2.50,
+            "C-": 2.25,
+            "D+": 2.00,
+            "D": 1.75,
+            "D-": 1.50,
+            "F": 0.50
+        };
+
+        function calculateGPA() {
+            const totalCreditsPassed = parseFloat(document.getElementById("totalCreditsPassed").value) || 0;
+            const currentGPA = parseFloat(document.getElementById("currentGPA").value) || 0;
+
+            const subjects = document.querySelectorAll(".subject");
+            const repeatedSubjects = document.querySelectorAll(".repeated-subject");
+
+            let semesterPoints = 0;
+            let semesterCredits = 0;
+
+            subjects.forEach(subject => {
+                const grade = subject.querySelector(".grade").value;
+                const credits = parseFloat(subject.querySelector(".credits").value) || 0;
+
+                if (gradePoints[grade] !== undefined) {
+                    semesterPoints += gradePoints[grade] * credits;
+                    semesterCredits += credits;
+                }
+            });
+
+            repeatedSubjects.forEach(repeatedSubject => {
+                const oldGrade = repeatedSubject.querySelector(".old-grade").value;
+                const newGrade = repeatedSubject.querySelector(".new-grade").value;
+                const credits = parseFloat(repeatedSubject.querySelector(".repeated-credits").value) || 0;
+
+                if (gradePoints[oldGrade] !== undefined && gradePoints[newGrade] !== undefined) {
+                    semesterPoints += gradePoints[newGrade] * credits;
+                    semesterCredits += credits;
+                }
+            });
+
+            const semesterGPA = semesterCredits > 0 ? semesterPoints / semesterCredits : 0;
+
+            const totalPoints = (currentGPA * totalCreditsPassed) + (semesterGPA * semesterCredits);
+            const totalCredits = totalCreditsPassed + semesterCredits;
+            const cumulativeGPA = totalCredits > 0 ? totalPoints / totalCredits : 0;
+
+            document.getElementById("result").textContent = `Semester GPA: ${semesterGPA.toFixed(2)} | Cumulative GPA: ${cumulativeGPA.toFixed(2)}`;
+        }
+
+        function addSubject() {
+            const subjectContainer = document.getElementById("subjectContainer");
+            const newSubject = document.createElement("div");
+            newSubject.className = "subject card";
+            newSubject.innerHTML = `
+                <input type="text" placeholder="Subject Name" class="subject-name" />
+                <select class="grade">
+                    <option value="">Grade</option>
+                    <option value="A+">A+</option>
+                    <option value="A">A</option>
+                    <option value="A-">A-</option>
+                    <option value="B+">B+</option>
+                    <option value="B">B</option>
+                    <option value="B-">B-</option>
+                    <option value="C+">C+</option>
+                    <option value="C">C</option>
+                    <option value="C-">C-</option>
+                    <option value="D+">D+</option>
+                    <option value="D">D</option>
+                    <option value="D-">D-</option>
+                    <option value="F">F</option>
+                </select>
+                <input type="number" placeholder="Credits" class="credits" step="0.1" />
+                <button onclick="removeElement(this)" style="margin-top: 10px;">Remove</button>
+            `;
+            subjectContainer.appendChild(newSubject);
+        }
+
+        function addRepeatedSubject() {
+            const repeatedContainer = document.getElementById("repeatedContainer");
+            const newRepeatedSubject = document.createElement("div");
+            newRepeatedSubject.className = "repeated-subject card";
+            newRepeatedSubject.innerHTML = `
+                <input type="text" placeholder="Subject Name" class="repeated-name" />
+                <input type="number" placeholder="Credits" class="repeated-credits" step="0.1" />
+                <select class="old-grade">
+                    <option value="">Old Grade</option>
+                    <option value="A+">A+</option>
+                    <option value="A">A</option>
+                    <option value="A-">A-</option>
+                    <option value="B+">B+</option>
+                    <option value="B">B</option>
+                    <option value="B-">B-</option>
+                    <option value="C+">C+</option>
+                    <option value="C">C</option>
+                    <option value="C-">C-</option>
+                    <option value="D+">D+</option>
+                    <option value="D">D</option>
+                    <option value="D-">D-</option>
+                    <option value="F">F</option>
+                </select>
+                <select class="new-grade">
+                    <option value="">New Grade</option>
+                    <option value="A+">A+</option>
+                    <option value="A">A</option>
+                    <option value="A-">A-</option>
+                    <option value="B+">B+</option>
+                    <option value="B">B</option>
+                    <option value="B-">B-</option>
+                    <option value="C+">C+</option>
+                    <option value="C">C</option>
+                    <option value="C-">C-</option>
+                    <option value="D+">D+</option>
+                    <option value="D">D</option>
+                    <option value="D-">D-</option>
+                    <option value="F">F</option>
+                </select>
+                <button onclick="removeElement(this)" style="margin-top: 10px;">Remove</button>
+            `;
+            repeatedContainer.appendChild(newRepeatedSubject);
+        }
+
+        function removeElement(button) {
+            button.parentElement.remove();
+        }
+
+        function toggleTheme() {
+            document.body.classList.toggle("dark-mode");
+        }
+    </script>
+</body>
+</html>
