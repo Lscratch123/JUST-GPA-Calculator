@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JUST GPA Calculator</title>
+    <title>GPA Calculator</title>
     <style>
         :root {
             --bg-color-light: #f9f9f9;
@@ -271,8 +271,29 @@
         }
 
         function toggleTheme() {
-            document.body.classList.toggle("dark-mode");
+            const body = document.body;
+            const isDarkMode = body.classList.toggle("dark-mode");
+            localStorage.setItem("theme", isDarkMode ? "dark" : "light");
         }
+
+        function loadTheme() {
+            const savedTheme = localStorage.getItem("theme");
+            if (savedTheme === "dark") {
+                document.body.classList.add("dark-mode");
+                document.getElementById("themeToggle").checked = true;
+            }
+        }
+
+        function initializeSubjects() {
+            if (!document.querySelector(".subject")) {
+                addSubject();
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            loadTheme();
+            initializeSubjects();
+        });
     </script>
 </body>
 </html>
