@@ -134,7 +134,7 @@
 
         <button onclick="calculateGPA()" style="margin-top: 20px;">Calculate GPA</button>
 
-        <h2 id="result" style="text-align: center; margin-top: 20px; white-space: pre-wrap;">Semester GPA: 0.00     Cumulative GPA: 0.00</h2>
+        <h2 id="result" style="text-align: center; margin-top: 20px; white-space: pre-wrap;">Semester GPA: 0.00              Cumulative GPA: 0.00</h2>
     </div>
 
     <script>
@@ -164,6 +164,9 @@
             let semesterPoints = 0;
             let semesterCredits = 0;
 
+            let adjustedPoints = currentGPA * totalCreditsPassed;
+
+            // Loop through regular subjects
             subjects.forEach(subject => {
                 const grade = subject.querySelector(".grade").value;
                 const credits = parseFloat(subject.querySelector(".credits").value) || 0;
@@ -174,27 +177,32 @@
                 }
             });
 
+            // Loop through repeated subjects
             repeatedSubjects.forEach(repeatedSubject => {
                 const oldGrade = repeatedSubject.querySelector(".old-grade").value;
                 const newGrade = repeatedSubject.querySelector(".new-grade").value;
                 const credits = parseFloat(repeatedSubject.querySelector(".repeated-credits").value) || 0;
 
                 if (gradePoints[oldGrade] !== undefined && gradePoints[newGrade] !== undefined) {
-                    semesterPoints += gradePoints[newGrade] * credits;
-                    semesterCredits += credits;
+                    const oldPoints = gradePoints[oldGrade] * credits;
+                    const newPoints = gradePoints[newGrade] * credits;
+                    adjustedPoints += (newPoints - oldPoints);
                 }
             });
 
-            const semesterGPA = semesterCredits > 0 ? semesterPoints / semesterCredits : 0;
-
-            const totalPoints = (currentGPA * totalCreditsPassed) + (semesterGPA * semesterCredits);
+            // Update adjusted points and total credits
+            adjustedPoints += semesterPoints;
             const totalCredits = totalCreditsPassed + semesterCredits;
-            const cumulativeGPA = totalCredits > 0 ? totalPoints / totalCredits : 0;
 
+            // Calculate final GPA values
+            const semesterGPA = semesterCredits > 0 ? semesterPoints / semesterCredits : 0;
+            const cumulativeGPA = totalCredits > 0 ? adjustedPoints / totalCredits : 0;
+
+            // Display results
             document.getElementById("result").innerHTML = `
-    <div>Semester GPA: ${semesterGPA.toFixed(2)}</div>
-    <div>Cumulative GPA: ${cumulativeGPA.toFixed(2)}</div>
-`;
+                <div>Semester GPA: ${semesterGPA.toFixed(2)}</div>
+                <div>Cumulative GPA: ${cumulativeGPA.toFixed(2)}</div>
+            `;
         }
 
         function addSubject() {
@@ -205,19 +213,7 @@
                 <input type="text" placeholder="Subject Name" class="subject-name" />
                 <select class="grade">
                     <option value="">Grade</option>
-                    <option value="A+">A+</option>
-                    <option value="A">A</option>
-                    <option value="A-">A-</option>
-                    <option value="B+">B+</option>
-                    <option value="B">B</option>
-                    <option value="B-">B-</option>
-                    <option value="C+">C+</option>
-                    <option value="C">C</option>
-                    <option value="C-">C-</option>
-                    <option value="D+">D+</option>
-                    <option value="D">D</option>
-                    <option value="D-">D-</option>
-                    <option value="F">F</option>
+                    ${Object.keys(gradePoints).map(grade => `<option value="${grade}">${grade}</option>`).join('')}
                 </select>
                 <input type="number" placeholder="Credits" class="credits" step="0.1" />
                 <button onclick="removeElement(this)" style="margin-top: 10px;">Remove</button>
@@ -234,35 +230,11 @@
                 <input type="number" placeholder="Credits" class="repeated-credits" step="0.1" />
                 <select class="old-grade">
                     <option value="">Old Grade</option>
-                    <option value="A+">A+</option>
-                    <option value="A">A</option>
-                    <option value="A-">A-</option>
-                    <option value="B+">B+</option>
-                    <option value="B">B</option>
-                    <option value="B-">B-</option>
-                    <option value="C+">C+</option>
-                    <option value="C">C</option>
-                    <option value="C-">C-</option>
-                    <option value="D+">D+</option>
-                    <option value="D">D</option>
-                    <option value="D-">D-</option>
-                    <option value="F">F</option>
+                    ${Object.keys(gradePoints).map(grade => `<option value="${grade}">${grade}</option>`).join('')}
                 </select>
                 <select class="new-grade">
                     <option value="">New Grade</option>
-                    <option value="A+">A+</option>
-                    <option value="A">A</option>
-                    <option value="A-">A-</option>
-                    <option value="B+">B+</option>
-                    <option value="B">B</option>
-                    <option value="B-">B-</option>
-                    <option value="C+">C+</option>
-                    <option value="C">C</option>
-                    <option value="C-">C-</option>
-                    <option value="D+">D+</option>
-                    <option value="D">D</option>
-                    <option value="D-">D-</option>
-                    <option value="F">F</option>
+                    ${Object.keys(gradePoints).map(grade => `<option value="${grade}">${grade}</option>`).join('')}
                 </select>
                 <button onclick="removeElement(this)" style="margin-top: 10px;">Remove</button>
             `;
