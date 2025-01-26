@@ -134,7 +134,7 @@
 
         <button onclick="calculateGPA()" style="margin-top: 20px;">Calculate GPA</button>
 
-        <h2 id="result" style="text-align: center; margin-top: 20px;">Semester GPA: 0.00                   Cumulative GPA: 0.00</h2>
+        <h2 id="result" style="text-align: center; margin-top: 20px; white-space: pre-wrap;">Semester GPA: 0.00              Cumulative GPA: 0.00</h2>
     </div>
 
     <script>
@@ -191,7 +191,10 @@
             const totalCredits = totalCreditsPassed + semesterCredits;
             const cumulativeGPA = totalCredits > 0 ? totalPoints / totalCredits : 0;
 
-            document.getElementById("result").textContent = `Semester GPA: ${semesterGPA.toFixed(2)} | Cumulative GPA: ${cumulativeGPA.toFixed(2)}`;
+            document.getElementById("result").innerHTML = `
+    <div>Semester GPA: ${semesterGPA.toFixed(2)}</div>
+    <div>Cumulative GPA: ${cumulativeGPA.toFixed(2)}</div>
+`;
         }
 
         function addSubject() {
